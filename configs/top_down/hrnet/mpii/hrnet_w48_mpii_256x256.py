@@ -72,7 +72,7 @@ model = dict(
     ),
     train_cfg=dict(),
     test_cfg=dict(
-        flip_test=True,
+        flip_test=False,
         post_process=True,
         shift_heatmap=True,
         unbiased_decoding=False,

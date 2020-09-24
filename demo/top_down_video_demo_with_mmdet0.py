@@ -7,6 +7,8 @@ from mmdet.apis import inference_detector, init_detector
 from mmpose.apis import (inference_top_down_pose_model, init_pose_model,
                          vis_pose_result)
 
+import time
+
 
 def main():
     """Visualize the demo images.
@@ -30,7 +32,7 @@ def main():
         help='Root of the output video file. '
         'Default not saving the visualization video.')
     parser.add_argument(
-        '--device', default='cuda:0', help='Device used for inference')
+        '--device', default='cpu', help='Device used for inference')
     parser.add_argument(
         '--bbox-thr',
         type=float,
@@ -47,19 +49,27 @@ def main():
 
     det_model = init_detector(
         args.det_config, args.det_checkpoint, device=args.device)
+    print('loaded detection model')
     # build the pose model from a config file and a checkpoint file
+    print('pose config: {0} \npose checkpoint: {1}'.format(args.pose_config, args.pose_checkpoint))
     pose_model = init_pose_model(
         args.pose_config, args.pose_checkpoint, device=args.device)
+    print('loaded poes model')
 
     dataset = pose_model.cfg.data['test']['type']
 
+    print(dataset)
+
     cap = cv2.VideoCapture(args.video_path)
+
+    print('loaded video')
 
     if args.out_video_root == '':
         save_out_video = False
     else:
         os.makedirs(args.out_video_root, exist_ok=True)
         save_out_video = True
+        print('save path: {0}'.format(args.out_video_root))
 
     if save_out_video:
         fps = cap.get(cv2.CAP_PROP_FPS)
@@ -71,14 +81,19 @@ def main():
                          f'vis_{os.path.basename(args.video_path)}'), fourcc,
             fps, size)
 
+    count = 0
+    t0 = time.perf_counter()
     while (cap.isOpened()):
+        t1 = time.perf_counter()
         flag, img = cap.read()
+
         if not flag:
             break
         # test a single image, the resulting box is (x1, y1, x2, y2)
         det_results = inference_detector(det_model, img)
         # keep the person class bounding boxes.
         person_bboxes = det_results[0].copy()
+
 
         # test a single image, with a list of bboxes.
         pose_results = inference_top_down_pose_model(
@@ -89,6 +104,11 @@ def main():
             format='xyxy',
             dataset=dataset)
 
+        count += 1
+        t = time.perf_counter()
+        print('Frame {0} analysed in {1} secs. Total time: {2} secs\
+                '.format(count, t - t1, t - t0))
+
         # show the results
         vis_img = vis_pose_result(
             pose_model,
@@ -98,7 +118,7 @@ def main():
             kpt_score_thr=args.kpt_thr,
             show=False)
 
-        if args.show:
+        if args.show or count == 3:
             cv2.imshow('Image', vis_img)
 
         if save_out_video:
@@ -114,4 +134,5 @@ def main():
 
 
 if __name__ == '__main__':
+    print('starting...')
     main()

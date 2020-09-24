@@ -119,3 +119,7 @@ work_dirs/
 *.pth
 
 *.DS_Store
+
+# custom custom
+mmdetection
+mmdetection/*
