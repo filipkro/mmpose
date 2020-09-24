@@ -1,0 +1,1 @@
+python demo/top_down_detection.py configs/top_down/darkpose/coco-wholebody/hrnet_w48_coco_wholebody_384x288_dark_plus.py checkpoints/top-down/hrnet_w48_coco_wholebody_384x288_dark-f5726563_20200918.pth --video-path /home/filipkr/Documents/xjob/vids/stair.mp4 --out-video-root /home/filipkr/Documents/xjob/vids/out

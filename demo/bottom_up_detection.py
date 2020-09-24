@@ -2,9 +2,8 @@ import os
 from argparse import ArgumentParser
 
 import cv2
-from mmdet.apis import inference_detector, init_detector
 
-from mmpose.apis import (inference_top_down_pose_model, init_pose_model,
+from mmpose.apis import (inference_bottom_up_pose_model, init_pose_model,
                          vis_pose_result)
 
 import time
@@ -17,8 +16,6 @@ def main():
     Using mmdet to detect the human.
     """
     parser = ArgumentParser()
-    # parser.add_argument('det_config', help='Config file for detection')
-    # parser.add_argument('det_checkpoint', help='Checkpoint file for detection')
     parser.add_argument('pose_config', help='Config file for pose')
     parser.add_argument('pose_checkpoint', help='Checkpoint file for pose')
     parser.add_argument('--video-path', type=str, help='Video path')
@@ -38,19 +35,14 @@ def main():
     args = parser.parse_args()
 
     assert args.show or (args.out_video_root != '')
-    # assert args.det_config is not None
-    # assert args.det_checkpoint is not None
 
-    # det_model = init_detector(
-    #     args.det_config, args.det_checkpoint, device=args.device)
-    # print('loaded detection model')
     # build the pose model from a config file and a checkpoint file
-
     pose_model = init_pose_model(args.pose_config, args.pose_checkpoint,
                                  device=args.device)
     print('loaded poes model')
 
     dataset = pose_model.cfg.data['test']['type']
+    assert (dataset == 'BottomUpCocoDataset')
 
     print(dataset)
 
@@ -72,27 +64,14 @@ def main():
         size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
                 int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        file_name = os.path.join(args.out_video_root,
-                                 f'vis_{os.path.basename(args.video_path)}')
+        videoWriter = cv2.VideoWriter(
+            os.path.join(args.out_video_root,
+                         f'vis_{os.path.basename(args.video_path)}').replace('.mp4', '-bottom.mp4'), fourcc,
+            fps, size)
 
-        while os.path.isfile(file_name):
-
-            file_name = file_name.replace('.mp4', '')
-
-            # if file_name[-1].isnumeric():
-            idx = file_name.find('-', -4)
-            if idx == -1:
-                file_name += '-0.mp4'
-            else:
-                file_name = file_name.replace(file_name[idx + 1::],
-                                              str(int(file_name[idx + 1::])
-                                                  + 1) + '.mp4')
-        print(file_name)
-        videoWriter = cv2.VideoWriter(file_name, fourcc, fps, size)
-
-    print(pose_model.cfg.channel_cfg['num_output_channels'])
+    print(pose_model.cfg.channel_cfg['dataset_joints'])
     poses = np.zeros((frames,
-                      pose_model.cfg.channel_cfg['num_output_channels'], 3))
+                      pose_model.cfg.channel_cfg['dataset_joints'], 3))
 
     print(poses.shape)
 
@@ -130,15 +109,11 @@ def main():
             # print(person_bboxes)
 
             # test a single image, with a list of bboxes.
-            pose_results = inference_top_down_pose_model(pose_model, img,
-                                                         person_bboxes,
-                                                         bbox_thr=args.bbox_thr,
-                                                         format='xyxy',
-                                                         dataset=dataset)
+            pose_results = inference_bottom_up_pose_model(pose_model, img)
 
             t = time.perf_counter()
-            print('Frame {0} out of {3} analysed in {1} secs. Total time: {2} secs\
-                    '.format(frame, t - t1, t - t0, frames))
+            print('Frame {0} analysed in {1} secs. Total time: {2} secs\
+                    '.format(frame, t - t1, t - t0))
 
             # print(pose_results)
             # np_results = np.asarray(pose_results[0]['keypoints'])
@@ -191,7 +166,9 @@ def main():
     cap.release()
     if save_out_video:
         videoWriter.release()
-        out_file = file_name.replace('.mp4', '.npy')
+        out_file = os.path.join(args.out_video_root,
+                                os.path.basename(args.video_path)
+                                ).replace('.mp4', '-bottom.npy')
         np.save(out_file, poses)
 
     cv2.destroyAllWindows()
