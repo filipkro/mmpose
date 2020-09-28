@@ -54,6 +54,10 @@ def main():
 
     print(dataset)
 
+    mod_used = pose_model.cfg.model['backbone']['type']
+
+    print('model used {0}'.format(mod_used))
+
     cap = cv2.VideoCapture(args.video_path)
 
     print('loaded video')
@@ -72,23 +76,24 @@ def main():
         size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
                 int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        file_name = os.path.join(args.out_video_root,
-                                 f'vis_{os.path.basename(args.video_path)}')
+        fname = os.path.join(args.out_video_root,
+                             f'vis_{os.path.basename(args.video_path)}')
 
-        while os.path.isfile(file_name):
+        fname = fname.replace(fname[fname.find('.', -5)::], '')
+        fname += mod_used + dataset + '.mp4'
+        print('FN {0}'.format(fname))
+        while os.path.isfile(fname):
+            fname = fname.replace('.mp4', '')
 
-            file_name = file_name.replace('.mp4', '')
-
-            # if file_name[-1].isnumeric():
-            idx = file_name.find('-', -4)
+            idx = fname.find('-', -4)
             if idx == -1:
-                file_name += '-0.mp4'
+                fname += '-0.mp4'
             else:
-                file_name = file_name.replace(file_name[idx + 1::],
-                                              str(int(file_name[idx + 1::])
-                                                  + 1) + '.mp4')
-        print(file_name)
-        videoWriter = cv2.VideoWriter(file_name, fourcc, fps, size)
+                fname = fname.replace(fname[idx + 1::],
+                                      str(int(fname[idx + 1::])
+                                          + 1) + '.mp4')
+        print(fname)
+        videoWriter = cv2.VideoWriter(fname, fourcc, fps, size)
 
     print(pose_model.cfg.channel_cfg['num_output_channels'])
     poses = np.zeros((frames,
@@ -105,11 +110,14 @@ def main():
 
     print('width: {0}, height: {1}'.format(width, height))
 
-    skip_ratio = 4
+    skip_ratio = 1
 
     person_bboxes = [[2 * width / 10, height /
                       8, 0.9 * width, 7 * height / 8, 1]]
-    # person_bboxes = [[width / 8, height / 8, 3 * width / 4, 3 * height / 4, 1]]
+
+    person_bboxes = [[2 * width / 10, height /
+                      5, 0.9 * width, 4 * height / 5, 1]]
+    # person_bboxes = [[0, 0, width, height, 1]]
     print(person_bboxes)
     while (cap.isOpened()):
         t1 = time.perf_counter()
@@ -148,12 +156,13 @@ def main():
             # show the results
             if np.shape(pose_results)[0] > 0:
                 prev_pose = pose_results
-                x_ratios = pose_results[0]['keypoints'][:, 0] / width
-                y_ratios = pose_results[0]['keypoints'][:, 1] / height
-                poses[frame, :, 0] = x_ratios
-                poses[frame, :, 1] = y_ratios
-                if frame == 0:
-                    print(x_ratios)
+                # x_ratios = pose_results[0]['keypoints'][:, 0] / width
+                # y_ratios = pose_results[0]['keypoints'][:, 1] / height
+                # poses[frame, :, 0] = x_ratios
+                # poses[frame, :, 1] = y_ratios
+                poses[frame, :, 0] = pose_results[0]['keypoints'][:, 0]
+                poses[frame, :, 1] = pose_results[0]['keypoints'][:, 1]
+
             else:
                 pose_results = prev_pose  # or maybe just skip saving
                 print('lol')
@@ -191,7 +200,7 @@ def main():
     cap.release()
     if save_out_video:
         videoWriter.release()
-        out_file = file_name.replace('.mp4', '.npy')
+        out_file = fname.replace('.mp4', '.npy')
         np.save(out_file, poses)
 
     cv2.destroyAllWindows()

@@ -183,6 +183,8 @@ def _inference_single_pose_model(model, img_or_path, bbox, dataset):
     elif dataset == 'TopDownOneHand10KDataset' or \
             dataset == 'TopDownFreiHandDataset':
         flip_pairs = []
+    elif dataset == 'TopDownMpiiDataset':
+        flip_pairs = []
     else:
         raise NotImplementedError()
 
@@ -452,7 +454,19 @@ def vis_pose_result(model,
             0, 0, 0, 0, 0, 4, 4, 4, 4, 8, 8, 8, 8, 12, 12, 12, 12, 16, 16, 16,
             16
         ]]
+    elif dataset == 'TopDownMpiiDataset':
 
+        skeleton = [[1, 2], [2, 3], [3, 7], [4, 7], [4, 5], [5, 6], [7, 8],
+                    [8, 9], [9, 10], [8, 13], [13, 12], [12, 11], [8, 14],
+                    [14, 15], [15, 16]]
+
+        pose_limb_color = palette[[
+            0, 0, 7, 7, 0, 0, 7, 7, 7, 9, 16, 16, 9, 16, 16
+        ]]
+
+        pose_kpt_color = palette[[
+            16, 16, 16, 16, 16, 9, 9, 9, 9, 9, 9, 0, 0, 0, 0, 0
+        ]]
     else:
         raise NotImplementedError()
 

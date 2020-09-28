@@ -123,3 +123,6 @@ work_dirs/
 # custom custom
 mmdetection
 mmdetection/*
+
+checkpoints
+checkpoints/*
