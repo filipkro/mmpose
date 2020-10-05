@@ -2,13 +2,41 @@ import os
 from argparse import ArgumentParser
 
 import cv2
-# from mmdet.apis import inference_detector, init_detector
+from mmdet.apis import inference_detector, init_detector, show_result_pyplot
 
 from mmpose.apis import (inference_top_down_pose_model, init_pose_model,
                          vis_pose_result)
 
 import time
 import numpy as np
+
+
+def box_check(img, device='cpu'):
+    flip = False
+    det_config = '/home/filipkr/Documents/xjob/mmpose/mmdetection/' +\
+        'configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py'
+    det_model = '/home/filipkr/Documents/xjob/mmpose/mmdetection/' +\
+        'checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
+    det_model = init_detector(det_config, det_model, device=device)
+    print('loaded detection model')
+
+    det_results = inference_detector(det_model, img)
+    # bbox = det_results[0]
+    bbox = np.expand_dims(np.array(det_results[0])[0, :], axis=0)
+    bbox[0, 2:4] = bbox[0, 2:4] + 100
+    # print(bbox)
+    if abs(bbox[0, 0] - bbox[0, 2]) > abs(bbox[0, 1] - bbox[0, 3]):
+        flip = True
+        bbox[0, 1] -= 100
+        bbox = [[bbox[0, 1], bbox[0, 0], bbox[0, 3], bbox[0, 2], bbox[0, 4]]]
+        print('frames will be flipped')
+    else:
+        bbox[0, 0] -= 100
+
+    print('bounding box found: {0}'.format(bbox))
+    show_result_pyplot(det_model, img, det_results)
+
+    return bbox, flip
 
 
 def main():
@@ -34,6 +62,7 @@ def main():
     parser.add_argument('--kpt-thr', type=float, default=0.3,
                         help='Keypoint score threshold')
     parser.add_argument('--file_name', type=str, default='')
+    parser.add_argument('--only_box', type=bool, default=False)
     # parser.add_argument('--csv-path', type=str, help='CSV path')
 
     args = parser.parse_args()
@@ -42,14 +71,11 @@ def main():
     # assert args.det_config is not None
     # assert args.det_checkpoint is not None
 
-    # det_model = init_detector(
-    #     args.det_config, args.det_checkpoint, device=args.device)
-    # print('loaded detection model')
     # build the pose model from a config file and a checkpoint file
 
     pose_model = init_pose_model(args.pose_config, args.pose_checkpoint,
                                  device=args.device)
-    print('loaded poes model')
+    print('loaded pose model')
 
     dataset = pose_model.cfg.data['test']['type']
 
@@ -60,8 +86,18 @@ def main():
     print('model used {0}'.format(mod_used))
 
     cap = cv2.VideoCapture(args.video_path)
+    print('loaded video...')
+    print('checking orientation and position')
 
-    print('loaded video')
+    flag, img = cap.read()
+    cap.release()
+    person_bboxes, flip = box_check(img)
+    cap = cv2.VideoCapture(args.video_path)
+
+    print(args.only_box)
+    if args.only_box:
+        # cv2.waitKey(0)
+        return
 
     frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
@@ -74,8 +110,12 @@ def main():
 
     if save_out_video:
         fps = cap.get(cv2.CAP_PROP_FPS)
-        size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        if flip:
+            size = (int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+                    int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)))
+        else:
+            size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                    int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
         m_dim = max(size)
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         if args.file_name == '':
@@ -118,20 +158,21 @@ def main():
 
     skip_ratio = 1
 
-    person_bboxes = [[2 * width / 10, height /
-                      8, 0.9 * width, 7 * height / 8, 1]]
+    # person_bboxes = [[2 * width / 10, height /
+    #                   8, 0.9 * width, 7 * height / 8, 1]]
 
     # person_bboxes = [[2 * width / 10, height /
     #                   5, 0.9 * width, 4 * height / 5, 1]]
     # person_bboxes = [[2*width/10, 0, 0.9*width, height, 1]]
     # person_bboxes = [[3 * width / 10, 0, 0.6 * width, height, 1]]
-    person_bboxes = [[35 * width / 10, 0.1 *
-                      height, 0.7 * width, 0.95 * height, 1]]
+    # person_bboxes = [[35 * width / 10, 0.1 *
+    #                   height, 0.7 * width, 0.95 * height, 1]]
     print(person_bboxes)
     while (cap.isOpened()):
         t1 = time.perf_counter()
         flag, img = cap.read()
-
+        if flip:
+            img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
         if not flag:
             break
 

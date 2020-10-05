@@ -40,7 +40,7 @@ def filter(idx, x_coords, y_coords):
 
 
 PATH = '/home/filipkr/Documents/xjob/vids/out/'
-FP = PATH + 'vis_001FLHRNetTopDownCocoDataset-2.npy'
+FP = PATH + 'vis_36SLS1R_Oqus_2_14902HRNetTopDownCocoWholeBodyDataset.npy'
 
 poses = np.load(FP)
 
@@ -48,7 +48,7 @@ if poses[0, 0, 0] < 1:
     poses[..., 0] = poses[..., 0] * 1920
     poses[..., 1] = poses[..., 1] * 1080
 
-kpt = poses[:, 14, 0:2]
+kpt = poses[:, 16, 0:2]
 
 frames = kpt.shape[0]
 print(frames)
@@ -93,10 +93,13 @@ init_weights()
 
 # plt.plot(xc)
 # plt.plot(xof)
-plt.plot(kpt[:, 0])
+# plt.plot(kpt[:, 0])
+plt.plot(poses[:, 14, 0], label='x')
+plt.plot(poses[:, 14, 1], label='y')
+plt.legend()
 # plt.plot(yc)
 # plt.plot(yof)
-plt.plot(kpt[:, 1])
+# plt.plot(kpt[:, 1])
 plt.show()
 #
 #

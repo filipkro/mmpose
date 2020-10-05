@@ -31,7 +31,7 @@ def main():
     args = parser.parse_args()
     poses = np.load(args.np_file)
     cap = cv2.VideoCapture(args.vid_file)
-    out_video = args.np_file.replace('.npy', '-filtered.mp4')
+    out_video = args.np_file.replace('.npy', '-filtered-2.mp4')
 
     fps = cap.get(cv2.CAP_PROP_FPS)
     size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -46,6 +46,7 @@ def main():
 
     poses = filt.outliers(poses)
     poses = filt.smoothing(poses)
+    poses = filt.fix_hip(poses)
 
     create_video(cap, poses, video_writer)
 
