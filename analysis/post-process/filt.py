@@ -41,14 +41,22 @@ def smoothing(poses):
 
 def fix_hip(poses):
     m = np.mean(abs(poses[:, 12, 1] - [poses[:, 11, 1]]))
-    right = poses[:, 12, 1]
-    left = poses[:, 11, 1]
 
     for i in range(poses.shape[0]):
         if abs(poses[i, 12, 1] - poses[i, 11, 1] < m - 10):
             mhip = (poses[i, 12, 1] + poses[i, 11, 1]) / 2
             poses[i, 11, 1] = mhip + m / 2 - 5
             poses[i, 12, 1] = mhip - m / 2 + 5
+
+    return poses
+
+
+def move_and_normalize(poses):
+    poses[:, :, 0] = poses[:, :, 0] - poses[:, :, 0].min()
+    poses[:, :, 1] = poses[:, :, 1] - poses[:, :, 1].min()
+
+    poses[:, :, 0] = poses[:, :, 0] / poses[:, :, 1].max()
+    poses[:, :, 1] = poses[:, :, 1] / poses[:, :, 1].max()
 
     return poses
 

@@ -168,6 +168,14 @@ def main():
     # person_bboxes = [[35 * width / 10, 0.1 *
     #                   height, 0.7 * width, 0.95 * height, 1]]
     print(person_bboxes)
+    # rmin = np.ones(2)
+    # rmax = np.zeros(2)
+    # lmin = np.ones(2)
+    # lmax = np.zeros(2)
+    lmin = 1
+    lmax = 0
+    rmin = 1
+    rmax = 0
     while (cap.isOpened()):
         t1 = time.perf_counter()
         flag, img = cap.read()
@@ -201,12 +209,32 @@ def main():
             # show the results
             if np.shape(pose_results)[0] > 0:
                 prev_pose = pose_results
-                # x_ratios = pose_results[0]['keypoints'][:, 0] / width
-                # y_ratios = pose_results[0]['keypoints'][:, 1] / height
+                # x_ratios = pose_results[0]['keypoints'][:, 0] / m_dim
+                # y_ratios = pose_results[0]['keypoints'][:, 1] / m_dim
+                ratios = pose_results[0]['keypoints'][:, 0:2] / m_dim
+
+                lmin = min((ratios[13, 1], lmin))
+                lmax = max((ratios[13, 1], lmax))
+                rmin = min((ratios[14, 0], rmin))
+                rmax = max((ratios[14, 1], rmax))
+                # lmin[0] = min((ratios[13, 0], lmin[0]))
+                # lmin[1] = min((ratios[13, 1], lmin[1]))
+                # lmax[0] = max((ratios[13, 0], lmax[0]))
+                # lmax[1] = max((ratios[13, 1], lmax[1]))
+                #
+                # rmin[0] = min((ratios[14, 0], rmin[0]))
+                # rmin[1] = min((ratios[14, 1], rmin[1]))
+                # rmax[0] = max((ratios[14, 0], rmax[0]))
+                # rmax[1] = max((ratios[14, 1], rmax[1]))
+
+                if (rmax - rmin) > 0.1 or (frame > 150 and
+                                           (rmax - rmin) > (lmax - lmin)):
+
+                poses[frame, ...] = ratios
                 # poses[frame, :, 0] = x_ratios
                 # poses[frame, :, 1] = y_ratios
-                poses[frame, :, 0] = pose_results[0]['keypoints'][:, 0] / m_dim
-                poses[frame, :, 1] = pose_results[0]['keypoints'][:, 1] / m_dim
+                # poses[frame, :, 0] = pose_results[0]['keypoints'][:, 0] / m_dim
+                # poses[frame, :, 1] = pose_results[0]['keypoints'][:, 1] / m_dim
 
             else:
                 pose_results = prev_pose  # or maybe just skip saving
