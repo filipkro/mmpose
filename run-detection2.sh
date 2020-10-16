@@ -6,7 +6,7 @@
 MODEL_CHECKPOINT="/home/filipkr/Documents/xjob/mmpose/checkpoints/top-down/hrnet_w48_coco_384x288_dark-741844ba_20200812.pth"
 #MODEL_CONFIG="/home/filipkr/Documents/xjob/mmpose/configs/top_down/darkpose/coco-wholebody/hrnet_w48_coco_wholebody_384x288_dark_plus.py"
 MODEL_CONFIG="/home/filipkr/Documents/xjob/mmpose/configs/top_down/darkpose/coco/hrnet_w48_coco_384x288_dark.py"
-VIDEO="/home/filipkr/Documents/xjob/vids/real/vids-before-after/006/Baseline/006FL.MTS"
+VIDEO="/home/filipkr/Documents/xjob/vids/real/36-mark/36SLS1R_Oqus_2_14902.avi"
 OUT_DIR="/home/filipkr/Documents/xjob/vids/results-fl/006/"
 FILE_NAME=""
 ONLY_BOX=false

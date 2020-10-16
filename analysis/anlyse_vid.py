@@ -40,6 +40,9 @@ def box_check(img, device='cpu'):
 
 
 def flip_box(bbox, width):
+
+    print(bbox)
+    print(width)
     bbox[0, 0] = width - bbox[0, 0]
     bbox[0, 2] = width - bbox[0, 2]
 
@@ -86,6 +89,7 @@ def loop(args, rotate, fname, person_bboxes, pose_model, flipped=False):
         if not flag:
             break
 
+        # if frame > 66:
         # check every nd frame
         if frame % skip_ratio == 0:
             # test a single image, with a list of bboxes.
@@ -139,13 +143,14 @@ def loop(args, rotate, fname, person_bboxes, pose_model, flipped=False):
 
         if args.show or frame % skip_ratio == 0:
             cv2.imshow('Image', vis_img)
-        frame += 1
 
         # if save_out_video:
         videoWriter.write(vis_img)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
+        frame += 1
 
     cap.release()
     # if save_out_video:
@@ -161,6 +166,10 @@ def start(args):
     cap = cv2.VideoCapture(args.video_path)
     print('loaded video...')
     print('checking orientation and position')
+
+    fps = cap.get(cv2.CAP_PROP_FPS)
+
+    print(fps)
 
     flag, img = cap.read()
     cap.release()
@@ -193,7 +202,7 @@ def start(args):
             fname = os.path.join(args.out_video_root,
                                  f'vis_{os.path.basename(args.video_path)}')
             fname = fname.replace(fname[fname.find('.', -5)::], '')
-            fname += mod_used + dataset + '.mp4'
+            fname += str(int(np.round(fps))) + mod_used + dataset + '.mp4'
             print('FN {0}'.format(fname))
             while os.path.isfile(fname):
                 fname = fname.replace('.mp4', '')
