@@ -27,6 +27,7 @@ def main():
     mts_labels = None
     kpts = [12, 13]
     angles = np.array([[12, 14]])
+    i = 0
     for file in os.listdir(args.root):
         if file.endswith('.npy'):
             filename = args.root + file
@@ -45,8 +46,9 @@ def main():
             # debug = file == 'vis_002FL25HRNetTopDownCocoDataset.npy'
             debug = False
             mts, mts_labels = parse_mts(
-                poses, kpts.copy(), 1, mts, mts_labels, angles, debug=debug)
+                poses, kpts.copy(), i % 2, mts, mts_labels, angles, debug=debug)
             # mts = mts[..., :-2]
+            i += 1
 
     print('Shape of MTS: {0}'.format(mts.shape))
     print('shape of labels {0}'.format(mts_labels.shape))
