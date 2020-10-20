@@ -1,6 +1,6 @@
-json_tricks
-mmcv>=1.1.1
-munkres
-opencv-python
-pillow
-xtcocotools
+json_tricks --prefix $pythonpath
+mmcv>=1.1.1 --prefix $pythonpath
+munkres --prefix $pythonpath
+opencv-python --prefix $pythonpath
+pillow --prefix $pythonpath
+xtcocotools --prefix $pythonpath
