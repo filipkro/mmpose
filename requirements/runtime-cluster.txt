@@ -1,5 +1,5 @@
 json_tricks
 munkres
-opencv-python-headless
-pillow
+#opencv-python-headless
+#pillow
 xtcocotools
