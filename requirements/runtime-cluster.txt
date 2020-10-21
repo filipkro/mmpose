@@ -2,5 +2,5 @@ json_tricks
 #mmcv>=1.1.1
 munkres
 #opencv-python-headless
-pillow
+#pillow
 xtcocotools
