@@ -1,3 +1,3 @@
--r requirements/build.txt
+-r requirements/build-cluster.txt
 -r requirements/runtime-cluster.txt
 -r requirements/tests.txt

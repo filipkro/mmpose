@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+from argparse import ArgumentParser
 
 
 def readme():
@@ -100,33 +101,70 @@ def parse_requirements(fname='requirements.txt', with_version=True):
 
 
 if __name__ == '__main__':
-    setup(
-        name='mmpose',
-        version=get_version(),
-        description='OpenMMLab Pose Estimation Toolbox and Benchmark.',
-        maintainer='MMPose Authors',
-        maintainer_email='openmmlab@gmail.com',
-        long_description=readme(),
-        long_description_content_type='text/markdown',
-        packages=find_packages(exclude=('configs', 'tools', 'demo')),
-        package_data={'mmpose.ops': ['*/*.so']},
-        classifiers=[
-            'Development Status :: 4 - Beta',
-            'License :: OSI Approved :: Apache Software License',
-            'Operating System :: OS Independent',
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.5',
-            'Programming Language :: Python :: 3.6',
-            'Programming Language :: Python :: 3.7',
-        ],
-        url='https://github.com/open-mmlab/mmpose',
-        license='Apache License 2.0',
-        setup_requires=parse_requirements('requirements/build.txt'),
-        tests_require=parse_requirements('requirements/tests.txt'),
-        install_requires=parse_requirements('requirements/runtime.txt'),
-        extras_require={
-            'all': parse_requirements('requirements.txt'),
-            'tests': parse_requirements('requirements/tests.txt'),
-            'build': parse_requirements('requirements/build.txt'),
-        },
-        zip_safe=False)
+
+    parser = ArgumentParser()
+    parser.add_argument('--device', default='', help='cluster or nothing')
+    args = parser.parse_args()
+
+    if args.device == '':
+        setup(
+            name='mmpose',
+            version=get_version(),
+            description='OpenMMLab Pose Estimation Toolbox and Benchmark.',
+            maintainer='MMPose Authors',
+            maintainer_email='openmmlab@gmail.com',
+            long_description=readme(),
+            long_description_content_type='text/markdown',
+            packages=find_packages(exclude=('configs', 'tools', 'demo')),
+            package_data={'mmpose.ops': ['*/*.so']},
+            classifiers=[
+                'Development Status :: 4 - Beta',
+                'License :: OSI Approved :: Apache Software License',
+                'Operating System :: OS Independent',
+                'Programming Language :: Python :: 3',
+                'Programming Language :: Python :: 3.5',
+                'Programming Language :: Python :: 3.6',
+                'Programming Language :: Python :: 3.7',
+            ],
+            url='https://github.com/open-mmlab/mmpose',
+            license='Apache License 2.0',
+            setup_requires=parse_requirements('requirements/build.txt'),
+            tests_require=parse_requirements('requirements/tests.txt'),
+            install_requires=parse_requirements('requirements/runtime.txt'),
+            extras_require={
+                'all': parse_requirements('requirements.txt'),
+                'tests': parse_requirements('requirements/tests.txt'),
+                'build': parse_requirements('requirements/build.txt'),
+            },
+            zip_safe=False)
+    else:
+        setup(
+            name='mmpose',
+            version=get_version(),
+            description='OpenMMLab Pose Estimation Toolbox and Benchmark.',
+            maintainer='MMPose Authors',
+            maintainer_email='openmmlab@gmail.com',
+            long_description=readme(),
+            long_description_content_type='text/markdown',
+            packages=find_packages(exclude=('configs', 'tools', 'demo')),
+            package_data={'mmpose.ops': ['*/*.so']},
+            classifiers=[
+                'Development Status :: 4 - Beta',
+                'License :: OSI Approved :: Apache Software License',
+                'Operating System :: OS Independent',
+                'Programming Language :: Python :: 3',
+                'Programming Language :: Python :: 3.5',
+                'Programming Language :: Python :: 3.6',
+                'Programming Language :: Python :: 3.7',
+            ],
+            url='https://github.com/open-mmlab/mmpose',
+            license='Apache License 2.0',
+            setup_requires=parse_requirements(
+                'requirements/build-cluster.txt'),
+            tests_require=parse_requirements('requirements/tests.txt'),
+            install_requires=parse_requirements('requirements/runtime-cluster.txt'),        extras_require={
+                'all': parse_requirements('requirements-cluster.txt'),
+                'tests': parse_requirements('requirements/tests.txt'),
+                'build': parse_requirements('requirements/build-cluster.txt'),
+            },
+            zip_safe=False)
