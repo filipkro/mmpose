@@ -122,12 +122,14 @@ if __name__ == '__main__':
         ],
         url='https://github.com/open-mmlab/mmpose',
         license='Apache License 2.0',
-        setup_requires=parse_requirements('requirements/build.txt'),
+        setup_requires=parse_requirements(
+            'requirements/build-cluster.txt'),
         tests_require=parse_requirements('requirements/tests.txt'),
-        install_requires=parse_requirements('requirements/runtime.txt'),
+        install_requires=parse_requirements(
+            'requirements/runtime-cluster.txt'),
         extras_require={
-            'all': parse_requirements('requirements.txt'),
+            'all': parse_requirements('requirements-cluster.txt'),
             'tests': parse_requirements('requirements/tests.txt'),
-            'build': parse_requirements('requirements/build.txt'),
+            'build': parse_requirements('requirements/build-cluster.txt'),
         },
         zip_safe=False)
