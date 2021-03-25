@@ -8,6 +8,7 @@ from mmcv.runner import load_checkpoint
 
 from mmpose.datasets.pipelines import Compose
 from mmpose.models import build_posenet
+import matplotlib.pyplot as plt
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
@@ -223,9 +224,14 @@ def _inference_single_pose_model(model, img_or_path, bbox, dataset):
 
     # forward the model
     with torch.no_grad():
+        #print('im')
+        #print(data['img'].shape)
+        im2show = np.squeeze(np.array(data['img']), axis=0)
+        plt.imshow(np.moveaxis(im2show, 0, -1))
+        plt.show()
         all_preds, _, _ = model(
             return_loss=False, img=data['img'], img_metas=data['img_metas'])
-
+    # print(all_preds)
     return all_preds[0]
 
 

@@ -523,6 +523,8 @@ class HRNet(nn.Module):
             else:
                 x_list.append(x)
         y_list = self.stage2(x_list)
+        #print('lol')
+        #print(y_list[0].shape)
 
         x_list = []
         for i in range(self.stage3_cfg['num_branches']):
@@ -539,7 +541,8 @@ class HRNet(nn.Module):
             else:
                 x_list.append(y_list[i])
         y_list = self.stage4(x_list)
-
+        # print('lol')
+        # print(y_list[0].shape)
         return y_list
 
     def train(self, mode=True):
